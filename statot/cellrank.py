@@ -32,7 +32,7 @@ class OTKernel(Kernel):
             assert adata.shape[0] == g.shape[0], "Size of g doesn't match adata!"
             self.g = g
     
-    def compute_transition_matrix(self, eps, dt, expr_key = "X_pca", cost_norm_method = None, sink_weights = None, method = "ent", thresh = 1e-9):
+    def compute_transition_matrix(self, eps, dt, expr_key = "X_pca", cost_norm_method = None, sink_weights = None, method = "ent", thresh = 1e-9, C = None):
         start = logg.info("Computing transition matrix using statOT")
         params = {"eps" : eps, "cost_norm_method" : cost_norm_method, "expr_key" : expr_key, "dt" : dt, "sink_weights" : sink_weights, "method" : method, "thresh" : thresh}
         if params == self.params:
@@ -41,11 +41,12 @@ class OTKernel(Kernel):
             logg.info("    Finish", time=start)
             return self
         self._params = params
-        C = ot.utils.dist(self.adata.obsm[expr_key])
-        if cost_norm_method == "mean":
-            C = C/C.mean()
-        elif cost_norm_method is not None:
-            C = ot.utils.cost_normalization(C, norm = cost_norm_method)
+        if C is None:
+            C = ot.utils.dist(self.adata.obsm[expr_key])
+            if cost_norm_method == "mean":
+                C = C/C.mean()
+            elif cost_norm_method is not None:
+                C = ot.utils.cost_normalization(C, norm = cost_norm_method)
         if sink_weights is None:
             sink_weights = np.ones(self.adata.shape[0])
         gamma, mu, nu = statot(self.adata.obsm[expr_key], self.source_idx, self.sink_idx,

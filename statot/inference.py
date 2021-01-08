@@ -39,7 +39,8 @@ def _compute_NS(P, sink_idx):
 
 def compute_fate_probs(P, sink_idx):
     N, S = _compute_NS(P, sink_idx)
-    B = N @ S
+    B = np.zeros((P.shape[0], sink_idx.sum()))
+    B[~sink_idx, :] = N @ S
     B[sink_idx, :] = np.eye(sink_idx.sum())
     return B
 
