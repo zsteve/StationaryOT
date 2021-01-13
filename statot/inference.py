@@ -7,7 +7,8 @@ import copy
 def statot(x, source_idx, sink_idx, sink_weights, C = None, eps = None, method = "ent", g = None,
            flow_rate = None,
            dt = None, 
-           maxiter = 5000, tol = 1e-9):
+           maxiter = 5000, tol = 1e-9,
+           verbose = False):
     mu_spt = x
     nu_spt = x
     if g is None:
@@ -21,12 +22,11 @@ def statot(x, source_idx, sink_idx, sink_weights, C = None, eps = None, method =
         mu[sink_idx] = 0
         nu = mu.sum()/x.shape[0]*np.ones(x.shape[0])
     if method == "quad":
-        gamma = ot.smooth.smooth_ot_dual(mu, nu, C, eps)
+        gamma = ot.smooth.smooth_ot_dual(mu, nu, C, eps, verbose = verbose)
     elif method == "ent":
-        gamma = ot.sinkhorn(mu, nu, C, eps, max_iter = maxiter, tol = tol*mu.sum())
+        gamma = ot.sinkhorn(mu, nu, C, eps, max_iter = maxiter, tol = tol*mu.sum(), verbose = verbose)
     elif method == "unbal":
         print("method = 'unbal' not implemented yet")
-        
     gamma[np.ix_(sink_idx, sink_idx)] = np.eye(sink_idx.sum())
     return gamma, mu, nu
 

@@ -14,7 +14,7 @@ from cellrank.tl.kernels._base_kernel import (
 )
 
 class OTKernel(Kernel):
-    def __init__(self, adata, source_idx, sink_idx, g, compute_cond_num = False):
+    def __init__(self, adata, source_idx, sink_idx, g, compute_cond_num = False, flow_rate = None):
         super().__init__(adata, backward = False, compute_cond_num = compute_cond_num, check_connectivity = False)
         if isinstance(source_idx, str):
             self.source_idx = adata.uns[source_idx]
@@ -28,11 +28,12 @@ class OTKernel(Kernel):
             self.sink_idx = sink_idx
         if isinstance(g, str):
             self.g = adata.obs[g]
-        else:
+        elif g is not None:
             assert adata.shape[0] == g.shape[0], "Size of g doesn't match adata!"
             self.g = g
+        self.flow_rate = flow_rate
     
-    def compute_transition_matrix(self, eps, dt, expr_key = "X_pca", cost_norm_method = None, sink_weights = None, method = "ent", thresh = 1e-9, C = None):
+    def compute_transition_matrix(self, eps, dt, expr_key = "X_pca", cost_norm_method = None, sink_weights = None, method = "ent", thresh = 1e-9, C = None, verbose = False):
         start = logg.info("Computing transition matrix using statOT")
         params = {"eps" : eps, "cost_norm_method" : cost_norm_method, "expr_key" : expr_key, "dt" : dt, "sink_weights" : sink_weights, "method" : method, "thresh" : thresh}
         if params == self.params:
@@ -55,7 +56,9 @@ class OTKernel(Kernel):
                                       eps = eps, 
                                       method = method, 
                                       g = self.g, 
-                                      dt = dt)
+                                      flow_rate = self.flow_rate, 
+                                      dt = dt,
+                                      verbose = verbose)
         # logg.error("statot() failed to converge, perhaps eps is too small?")
 
         transition_matrix = (gamma.T/gamma.sum(1)).T
