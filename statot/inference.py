@@ -34,13 +34,14 @@ def statot(x, source_idx, sink_idx, sink_weights, C = None, eps = None, method =
 def _compute_NS(P, sink_idx):
     Q = P[np.ix_(~sink_idx, ~sink_idx)]
     S = P[np.ix_(~sink_idx, sink_idx)]
-    N = np.linalg.inv(np.eye(Q.shape[0]) - Q)
+    # N = np.linalg.inv(np.eye(Q.shape[0]) - Q) BAD!!!!
+    N = np.eye(Q.shape[0]) - Q
     return N, S
 
 def compute_fate_probs(P, sink_idx):
     N, S = _compute_NS(P, sink_idx)
     B = np.zeros((P.shape[0], sink_idx.sum()))
-    B[~sink_idx, :] = N @ S
+    B[~sink_idx, :] = np.linalg.solve(N, S)
     B[sink_idx, :] = np.eye(sink_idx.sum())
     return B
 
