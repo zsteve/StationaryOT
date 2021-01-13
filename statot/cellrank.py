@@ -31,6 +31,8 @@ class OTKernel(Kernel):
         elif g is not None:
             assert adata.shape[0] == g.shape[0], "Size of g doesn't match adata!"
             self.g = g
+        else:
+            self.g = g
         self.flow_rate = flow_rate
     
     def compute_transition_matrix(self, eps, dt, expr_key = "X_pca", cost_norm_method = None, sink_weights = None, method = "ent", thresh = 1e-9, C = None, verbose = False):

@@ -22,9 +22,9 @@ def statot(x, source_idx, sink_idx, sink_weights, C = None, eps = None, method =
         mu[sink_idx] = 0
         nu = mu.sum()/x.shape[0]*np.ones(x.shape[0])
     if method == "quad":
-        gamma = ot.smooth.smooth_ot_dual(mu, nu, C, eps, verbose = verbose)
+        gamma = ot.smooth.smooth_ot_dual(mu, nu, C, eps, numItermax = maxiter, stopThr = tol*mu.sum(), verbose = verbose)
     elif method == "ent":
-        gamma = ot.sinkhorn(mu, nu, C, eps, max_iter = maxiter, tol = tol*mu.sum(), verbose = verbose)
+        gamma = ot.sinkhorn(mu, nu, C, eps, numItermax = maxiter, stopThr = tol*mu.sum(), verbose = verbose)
     elif method == "unbal":
         print("method = 'unbal' not implemented yet")
     gamma[np.ix_(sink_idx, sink_idx)] = np.eye(sink_idx.sum())
