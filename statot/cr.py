@@ -23,6 +23,7 @@ class OTKernel(Kernel):
     :param source_idx: boolean array of length `N`, set to `True` for sources and `False` otherwise.
     :param sink_idx: boolean array of length `N`, set to `True` for sinks and `False` otherwise.
     :param g: numeric array of length `N`, containing the relative growth rates for cells.
+    :param compute_cond_num: set to `True` to compute the condition number of the transition matrix. 
     """
     def __init__(self, adata, source_idx, sink_idx, g, compute_cond_num = False, flow_rate = None):
         super().__init__(adata, backward = False, compute_cond_num = compute_cond_num, check_connectivity = False)
