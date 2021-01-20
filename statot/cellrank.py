@@ -4,7 +4,7 @@ from numpy import linalg
 import ot
 import copy
 from scipy.sparse import spmatrix, csr_matrix
-from statot.inference import statot
+from statot.inference import statot, row_normalise
 
 import cellrank
 from cellrank import logging as logg
@@ -35,7 +35,7 @@ class OTKernel(Kernel):
             self.g = g
         self.flow_rate = flow_rate
     
-    def compute_transition_matrix(self, eps, dt, expr_key = "X_pca", cost_norm_method = None, sink_weights = None, method = "ent", thresh = 1e-9, C = None, verbose = False):
+    def compute_transition_matrix(self, eps, dt, expr_key = "X_pca", cost_norm_method = None, sink_weights = None, method = "ent", thresh = 1e-9, maxiter = 5000, C = None, verbose = False):
         start = logg.info("Computing transition matrix using statOT")
         params = {"eps" : eps, "cost_norm_method" : cost_norm_method, "expr_key" : expr_key, "dt" : dt, "sink_weights" : sink_weights, "method" : method, "thresh" : thresh}
         if params == self.params:
@@ -60,10 +60,11 @@ class OTKernel(Kernel):
                                       g = self.g, 
                                       flow_rate = self.flow_rate, 
                                       dt = dt,
+                                      maxiter = maxiter, 
                                       verbose = verbose)
         # logg.error("statot() failed to converge, perhaps eps is too small?")
 
-        transition_matrix = (gamma.T/gamma.sum(1)).T
+        transition_matrix = row_normalise(gamma) 
         if thresh is not None:
             transition_matrix[transition_matrix < thresh] = 0
             transition_matrix = (transition_matrix.T/transition_matrix.sum(1)).T

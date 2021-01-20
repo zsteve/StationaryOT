@@ -1,3 +1,6 @@
+# statOT 
+# Author: Stephen Zhang (syz@math.ubc.ca)
+
 import numpy as np
 import pandas as pd
 from numpy import linalg 
@@ -9,6 +12,14 @@ def statot(x, source_idx, sink_idx, sink_weights, C = None, eps = None, method =
            dt = None, 
            maxiter = 5000, tol = 1e-9,
            verbose = False):
+    """Fit statOT model
+    
+    :param x: input data -- `N` points of `M` dimensions in the form of a matrix with dimensions `(N, M)`
+    :param source_idx: boolean array of length `N`, set to `True` for sources and `False` otherwise.
+    :param sink_idx: boolean array of length `N`, set to `True` for sinks and `False` otherwise.
+    :param sink_weights: numeric array of length `N`. Only the entries corresponding to sinks will be used.
+    :return: gamma, mu, nu
+    """
     mu_spt = x
     nu_spt = x
     if g is None:
@@ -27,8 +38,19 @@ def statot(x, source_idx, sink_idx, sink_weights, C = None, eps = None, method =
         gamma = ot.sinkhorn(mu, nu, C, eps, numItermax = maxiter, stopThr = tol*mu.sum(), verbose = verbose)
     elif method == "unbal":
         print("method = 'unbal' not implemented yet")
+    # manually check for convergence since POT is a bit iffy
+    if verbose:
+        print("max inf-norm error for marginal agreement: ",
+              max(np.linalg.norm(gamma.sum(1) - mu, ord = np.inf), np.linalg.norm(gamma.sum(0) - nu, ord = np.inf)))
     gamma[np.ix_(sink_idx, sink_idx)] = np.eye(sink_idx.sum())
     return gamma, mu, nu
+
+def row_normalise(gamma):
+    """Row normalise coupling to produce transition matrix
+    :param gamma: coupling produced by `statot()`
+    :return: transition matrix obtained by row-normalising the input `gamma`.
+    """
+    return (gamma.T/gamma.sum(1)).T
 
 # transliterated from Julia code
 def _compute_NS(P, sink_idx):
@@ -39,6 +61,11 @@ def _compute_NS(P, sink_idx):
     return N, S
 
 def compute_fate_probs(P, sink_idx):
+    """Compute fate probabilities by individual sink cell
+    :param P: transition matrix
+    :param sink_idx: boolean array of length `N`, set to `True` for sinks and `False` otherwise.
+    :return: matrix with dimensions `(N, S)` where `S` is the number of sink cells present.
+    """
     N, S = _compute_NS(P, sink_idx)
     B = np.zeros((P.shape[0], sink_idx.sum()))
     B[~sink_idx, :] = np.linalg.solve(N, S)
@@ -46,6 +73,12 @@ def compute_fate_probs(P, sink_idx):
     return B
 
 def compute_fate_probs_lineages(P, sink_idx, labels):
+    """Compute fate probabilities by lineage
+    :param P: transition matrix
+    :param sink_idx: boolean array of length `N`, set to `True` for sinks and `False` otherwise.
+    :param labels: string array of length `N` containing lineage names. Only those entries corresponding to sinks will be used.
+    :return: matrix with dimensions `(N, L)` where `L` is the number of lineages with sinks.
+    """
     B = compute_fate_probs(P, sink_idx)
     sink_labels = np.unique(labels[sink_idx])
     B_lineages = np.array([B[:, labels[sink_idx] == i].sum(1) for i in sink_labels]).T
