@@ -18,6 +18,15 @@ def statot(x, source_idx, sink_idx, sink_weights, C = None, eps = None, method =
     :param source_idx: boolean array of length `N`, set to `True` for sources and `False` otherwise.
     :param sink_idx: boolean array of length `N`, set to `True` for sinks and `False` otherwise.
     :param sink_weights: numeric array of length `N`. Only the entries corresponding to sinks will be used.
+    :param C: cost matrix for optimal transport problem
+    :param eps: regularisation parameter 
+    :param method: choice of regularisation -- either "ent" (entropy) or "quad" (L2). "unbal" for unbalanced transport is not yet implemented. 
+    :param g: numeric array of length `N`, containing the relative growth rates for cells.
+    :param flow_rate: used only in the growth-free case (flow only)
+    :param dt: choice of the time step over which to fit the model
+    :param maxiter: max number of iterations for OT solver
+    :param tol: relative tolerance for OT solver convergence
+    :param verbose: detailed output on convergence of OT solver. 
     :return: gamma, mu, nu
     """
     mu_spt = x
