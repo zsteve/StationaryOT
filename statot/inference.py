@@ -27,7 +27,7 @@ def statot(x, source_idx, sink_idx, sink_weights, C = None, eps = None, method =
     :param maxiter: max number of iterations for OT solver
     :param tol: relative tolerance for OT solver convergence
     :param verbose: detailed output on convergence of OT solver. 
-    :return: gamma, mu, nu
+    :return: gamma (optimal transport coupling), mu (source measure), nu (target measure)
     """
     mu_spt = x
     nu_spt = x
