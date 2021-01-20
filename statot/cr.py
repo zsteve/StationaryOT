@@ -1,3 +1,6 @@
+# statOT cellrank wrapper
+# Author: Stephen Zhang (syz@math.ubc.ca)
+
 import numpy as np
 import pandas as pd
 from numpy import linalg 
@@ -14,6 +17,13 @@ from cellrank.tl.kernels._base_kernel import (
 )
 
 class OTKernel(Kernel):
+    """Kernel class allowing statOT method to be used from CellRank
+    
+    :param adata: `AnnData` object containing `N` cells. We can use any embedding for statOT, selected when calling `OTKernel.compute_transition_matrix()`. 
+    :param source_idx: boolean array of length `N`, set to `True` for sources and `False` otherwise.
+    :param sink_idx: boolean array of length `N`, set to `True` for sinks and `False` otherwise.
+    :param g: numeric array of length `N`, containing the relative growth rates for cells.
+    """
     def __init__(self, adata, source_idx, sink_idx, g, compute_cond_num = False, flow_rate = None):
         super().__init__(adata, backward = False, compute_cond_num = compute_cond_num, check_connectivity = False)
         if isinstance(source_idx, str):

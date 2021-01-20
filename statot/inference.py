@@ -1,4 +1,4 @@
-# statOT 
+# statOT core 
 # Author: Stephen Zhang (syz@math.ubc.ca)
 
 import numpy as np
