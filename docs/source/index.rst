@@ -10,6 +10,24 @@ Welcome to statOT's documentation!
     :maxdepth: 2
     :caption: Contents:
 
+statOT package
+==============
+
+Core implementation
+-------------------
+.. automodule:: statot.inference
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+CellRank wrapper
+----------------
+.. automodule:: statot.cr
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 Indices and tables
 ==================
 
