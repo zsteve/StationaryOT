@@ -47,6 +47,7 @@ def statot(x, source_idx, sink_idx, sink_weights, C = None, eps = None, method =
 
 def row_normalise(gamma):
     """Row normalise coupling to produce transition matrix
+
     :param gamma: coupling produced by `statot()`
     :return: transition matrix obtained by row-normalising the input `gamma`.
     """
@@ -62,6 +63,7 @@ def _compute_NS(P, sink_idx):
 
 def compute_fate_probs(P, sink_idx):
     """Compute fate probabilities by individual sink cell
+
     :param P: transition matrix
     :param sink_idx: boolean array of length `N`, set to `True` for sinks and `False` otherwise.
     :return: matrix with dimensions `(N, S)` where `S` is the number of sink cells present.
@@ -74,6 +76,7 @@ def compute_fate_probs(P, sink_idx):
 
 def compute_fate_probs_lineages(P, sink_idx, labels):
     """Compute fate probabilities by lineage
+
     :param P: transition matrix
     :param sink_idx: boolean array of length `N`, set to `True` for sinks and `False` otherwise.
     :param labels: string array of length `N` containing lineage names. Only those entries corresponding to sinks will be used.
