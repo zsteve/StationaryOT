@@ -51,6 +51,6 @@ compute_fate_probs_lineages(P, sink_idx, labels)
 where `labels` should be a `np.array` of strings corresponding to the lineage annotation for each cell.
 
 ### References
-[1] Schiebinger, G et al. Optimal-transport analysis of single-cell gene expression identifies developmentaltrajectories in reprogramming. Cell. 2019; 176(4): 928–943. doi: https://doi.org/10.1016/j.cell.2019.02.026.
+[1] Schiebinger, G et al. Optimal-transport analysis of single-cell gene expression identifies developmentaltrajectories in reprogramming. Cell. 2019; 176(4): 928–943. https://doi.org/10.1016/j.cell.2019.02.026.
 
-[2] Weinreb et al. Fundamental limits ondynamic inference from single-cell snapshots. Proceedings of the NationalAcademy of Sciences. 2018; 115(10):E2467–E2476. doi: https://doi.org/10.1073/pnas.1714723115.
+[2] Weinreb et al. Fundamental limits ondynamic inference from single-cell snapshots. Proceedings of the NationalAcademy of Sciences. 2018; 115(10):E2467–E2476. https://doi.org/10.1073/pnas.1714723115.
