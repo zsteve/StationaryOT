@@ -10,7 +10,7 @@ where ![equilibrium equation](https://github.com/zsteve/statOT/blob/main/aux_fil
 
 This problem has previously been explored by Weinreb et al. [2] who approach the problem by solving a system of linear equations to recover the potential. In contrast, stationary OT solves a convex optimization problem for the transition probabilities. This approach has the flexibility to allow additional information such as RNA velocity, which may allow recovery of non-conservative dynamics such as oscillations. Combined with earlier OT approaches, stationary OT provides a framework for approaching both time-series and snapshot data.
 
-This package provides the ability to run stationary OT on single-cell expression data to recover transition and fate probabilities. This package also provides a wrapper for use with (CellRank)[https://cellrank.readthedocs.io/en/latest/].
+This package provides the ability to run stationary OT on single-cell expression data to recover transition and fate probabilities. This package also provides a wrapper for use with [CellRank](https://cellrank.readthedocs.io/en/latest/).
 
 ## Installation
 
