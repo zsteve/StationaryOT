@@ -1,6 +1,6 @@
 # Stationary OT
 
-Entropy-regularized optimal transport (OT) has been applied to infer cellular trajectories in time-course data[1]. Stationary OT extends this approach to snapshots of biological systems in equilibrium. A system is in equilibrium if you would expect the same proportions of populations in each snapshot, though individual cells progress along trajectories. 
+Entropy-regularized optimal transport has been applied to infer cellular trajectories in time-course data[1]. Stationary optimal transport (OT) extends this approach to snapshots of biological systems in equilibrium. A system is in equilibrium if you would expect the same proportions of populations in each snapshot, though individual cells progress along trajectories. 
 
 We model biological processes as a diffusion-drift process subject to branching due to cell birth and death. To maintain equlibrium we define source and sink regions, where cells are created in the source regions and are absorbed in the sinks subject to birth and death rates. At a population level, the effects of growth, entry, and exit can be captured by a spatially dependent flux, R(x), and population dynamics can be described by a population balance partial differential equation:
 
@@ -8,7 +8,7 @@ We model biological processes as a diffusion-drift process subject to branching 
 
 where ![equilibrium equation](https://github.com/zsteve/statOT/blob/main/aux_files/equilibrium-eqn.png) by our equilibirum assumption.
 
-This problem has previously been explored by Weinreb et. al who approach the problem by solving a system of linear equations to recover the potential. In contrast, stationary OT solves a convex optimization problem for the transition probabilities. This approach has the flexibility to allow additional information, such as RNA velocity, which may allow recovery of non-conservative dynamics such as oscillations. Combined with earlier OT approaches, stationary OT provides a framework for approaching both time-series and snapshot data.
+This problem has previously been explored by Weinreb et. al [2] who approach the problem by solving a system of linear equations to recover the potential. In contrast, stationary OT solves a convex optimization problem for the transition probabilities. This approach has the flexibility to allow additional information such as RNA velocity, which may allow recovery of non-conservative dynamics such as oscillations. Combined with earlier OT approaches, stationary OT provides a framework for approaching both time-series and snapshot data.
 
 This package provides the ability to run stationary OT on single-cell expression data to recover transition and fate probabilities. This package also provides the interface to use stationary OT with CellRank.
 
@@ -49,3 +49,7 @@ Finally, to compute the fate probabilities by lineage, use
 compute_fate_probs_lineages(P, sink_idx, labels)
 ```
 where `labels` should be a `np.array` of strings corresponding to the lineage annotation for each cell.
+
+[1] Schiebinger, G et al. Optimal-transport analysis of single-cell gene expression identifies developmentaltrajectories in reprogramming. Cell. 2019; 176(4): 928–943. doi: https://doi.org/10.1016/j.cell.2019.02.026.
+
+[2] Weinreb et al. Fundamental limits ondynamic inference from single-cell snapshots. Proceedings of the NationalAcademy of Sciences. 2018; 115(10):E2467–E2476. doi: https://doi.org/10.1073/pnas.1714723115.
