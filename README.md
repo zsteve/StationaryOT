@@ -19,12 +19,12 @@ For now, clone this repository and run `pip install .` in the top level director
 ## Usage
 
 ### Inputs
-1. **Projected Expression Matrix**: An n x m matrix of cells by expression data. We recommend projecting the data into X-Y dimensions using PCA.
-2. **Sinks**: An n x 1 boolean vector indicating cells that leave the system.
-3. **Sources**: An n x 1 boolean vector indicating cells that are where mass is entering the system. Typically, this will be the complement of the sink vector.
-4. **Sink Weights**: An n x 1 vector indicating the weight of each sink, where sinks with higher weight will absorb more mass.
-5. **Cost Matrix**: An n x n matrix specifiying the cost for each cell transporting to each other cell in the coupling, such as the Euclidean distance between cells in PCA coordinates.
-6. **Growth Rates**: An n x 1 vector specifying the expected number of decendents of each cell in $dt = 1$.
+1. **Projected Expression Matrix**: An *n x m* matrix of cells by expression data. We recommend projecting the data into X-Y dimensions using PCA.
+2. **Sinks**: An *n x 1* boolean vector indicating cells that leave the system.
+3. **Sources**: An *n x 1* boolean vector indicating cells that are where mass is entering the system. Typically, this will be the complement of the sink vector.
+4. **Sink Weights**: An *n x 1* vector indicating the weight of each sink, where sinks with higher weight will absorb more mass.
+5. **Cost Matrix**: An *n x n* matrix specifiying the cost for each cell transporting to each other cell in the coupling, such as the Euclidean distance between cells in PCA coordinates.
+6. **Growth Rates**: An *n x 1* vector specifying the expected number of decendents of each cell in *dt = 1*.
 7. **dt**: The timestep between snapshots.
 
 ### Quick Start
