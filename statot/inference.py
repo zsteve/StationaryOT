@@ -95,3 +95,34 @@ def compute_fate_probs_lineages(P, sink_idx, labels):
     sink_labels = np.unique(labels[sink_idx])
     B_lineages = np.array([B[:, labels[sink_idx] == i].sum(1) for i in sink_labels]).T
     return B_lineages, sink_labels
+
+
+def compute_conditional_mfpt(P, j, sink_idx):
+    """Compute conditional mean first passage time MFPT(x_i -> x_j). Based on implementation in PBA.
+    
+    :param P: transition matrix
+    :param j: index j of cell x_j
+    :param sink_idx: boolean array of length `N`, set to `True` for sinks and `False` otherwise.
+    :return: vector t_i containing MFPT(x_i -> x_)
+    """
+    new_idx = list(range(P.shape[0]))
+    new_idx.remove(j)
+    new_idx.append(j)
+    new_P = P.copy()[new_idx, :][:, new_idx]
+    new_sinks = sink_idx.copy()[new_idx]
+    new_sinks[-1] = True
+    new_P[-1, :] = 0
+    new_P[-1, -1] = 1
+    new_P = row_normalise(new_P)
+    Q = new_P[np.ix_(~new_sinks, ~new_sinks)]
+    S = new_P[np.ix_(~new_sinks, new_sinks)]
+    N = np.linalg.inv(np.eye(Q.shape[0]) - Q)
+    B = np.dot(N, S)
+    d = B[:, -1]
+    mask = sink_idx.copy()
+    mask[j] = True
+    t = np.zeros(P.shape[0])
+    t[~mask] = (1/d)*(N @ d)
+    t[mask] = float('Inf')
+    t[j] = 0
+    return t
