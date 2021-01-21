@@ -1,5 +1,6 @@
 # Stationary OT
 
+## Introduction and overview
 Entropy-regularized optimal transport has been used to infer cellular trajectories in time-course data [1]. Stationary optimal transport (OT) extends this approach to snapshots of biological systems in equilibrium. A system is in equilibrium if you would expect the same proportions of populations in each snapshot, though individual cells progress along trajectories. 
 
 We model biological processes with a diffusion-drift process subject to branching due to cell birth and death. To maintain equlibrium, we define source and sink regions, where cells are created in the source regions and are absorbed in the sinks subject to birth and death rates. At a population level, the effects of growth, entry, and exit can be captured by a spatially dependent flux, R(x), and population dynamics can be described by a population balance partial differential equation:
