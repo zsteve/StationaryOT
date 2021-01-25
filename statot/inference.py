@@ -126,3 +126,12 @@ def compute_conditional_mfpt(P, j, sink_idx):
     t[mask] = float('Inf')
     t[j] = 0
     return t
+
+def velocity_from_transition_matrix(P, x, deltat):
+    """Estimate velocity field from transition matrix (i.e. compute expected displacements)
+    
+    :param P: transition matrix
+    :param x: input data -- `N` points of `M` dimensions in the form of a matrix with dimensions `(N, M)`
+    :param deltat: timestep for which `P` was calculated.
+    """
+    return (P @ x - x)/deltat
