@@ -1,4 +1,4 @@
-# Stationary OT
+# statOT: Dynamic inference from single-cell snapshots by optimal transport
 
 ## Introduction and overview
 Entropy-regularized optimal transport has been used to infer cellular trajectories in time-course data [1]. Stationary optimal transport (OT) extends this approach to snapshots of biological systems in equilibrium. A system is in equilibrium if you would expect the same proportions of populations in each snapshot, though individual cells progress along trajectories. 
