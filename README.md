@@ -19,6 +19,8 @@ Clone this repository and run `pip install .` in the top level directory.
 
 ## Usage
 
+Read the full documentation [here](https://statot.readthedocs.io/en/latest/).
+
 ### Inputs
 1. **Projected Expression Matrix**: An *n x m* matrix of cells by expression data. We recommend using a lower-dimensional embedding such as PCA.
 2. **Sinks**: An *n x 1* boolean vector indicating cells that leave the system.
@@ -50,6 +52,9 @@ Finally, to compute the fate probabilities by lineage, use
 compute_fate_probs_lineages(P, sink_idx, labels)
 ```
 where `labels` should be a `np.array` of strings corresponding to the lineage annotation for each cell.
+
+### Citing
+We are actively working on a manuscript which will be posted as a preprint soon.
 
 ### References
 [1] Schiebinger, G et al. Optimal-transport analysis of single-cell gene expression identifies developmentaltrajectories in reprogramming. Cell. 2019; 176(4): 928–943. https://doi.org/10.1016/j.cell.2019.02.026.
