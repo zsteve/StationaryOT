@@ -16,6 +16,21 @@ from cellrank.tl.kernels._base_kernel import (
     _LOG_USING_CACHE
 )
 
+def set_terminal_states(adata, sink_idx, labels, terminal_colors):
+    """Set terminal states for CellRank API
+    
+    :param adata: `AnnData` object containing `N` cells. 
+    :param sink_idx: string specifying the key in `adata.uns` to a boolean array of length `N`, set to `True` for sinks and `False` otherwise, or the array itself.
+    :param labels: string array of length `N` containing lineage names. Only those entries corresponding to sinks will be used.
+    :param terminal_colors: colors corresponding to terminal state labels.
+    """
+    adata.obs["terminal_states"] = None
+    adata.obs.loc[sink_idx, "terminal_states"] = labels[sink_idx]
+    adata.obs["terminal_states"] = adata.obs["terminal_states"].astype("category")
+    adata.uns['terminal_states_colors'] = terminal_colors
+    adata.uns['terminal_states_names'] = np.array(adata.obs.terminal_states.cat.categories)
+    return 
+
 class OTKernel(Kernel):
     """Kernel class allowing statOT method to be used from CellRank
     
