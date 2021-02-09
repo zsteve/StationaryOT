@@ -7,8 +7,7 @@ from numpy import linalg
 import ot
 import copy
 
-def statot(x, source_idx, sink_idx, sink_weights, C = None, eps = None, method = "ent", g = None,
-           flow_rate = None,
+def statot(x, C = None, eps = None, method = "ent", g = None,
            dt = None, 
            maxiter = 5000, tol = 1e-9,
            verbose = False):
@@ -31,16 +30,8 @@ def statot(x, source_idx, sink_idx, sink_weights, C = None, eps = None, method =
     """
     mu_spt = x
     nu_spt = x
-    if g is None:
-        mu = np.ones(mu_spt.shape[0])
-        mu[sink_idx] = 0
-        mu[source_idx] += (flow_rate*dt)/source_idx.sum()
-        nu = np.ones(nu_spt.shape[0])
-        nu[sink_idx] = (flow_rate*dt)*sink_weights[sink_idx]/sink_weights[sink_idx].sum()
-    else:
-        mu = g**dt
-        mu[sink_idx] = 0
-        nu = mu.sum()/x.shape[0]*np.ones(x.shape[0])
+    mu = g**dt
+    nu = mu.sum()/x.shape[0]*np.ones(x.shape[0])
     if method == "quad":
         gamma = ot.smooth.smooth_ot_dual(mu, nu, C, eps, numItermax = maxiter, stopThr = tol*mu.sum(), verbose = verbose)
     elif method == "ent":
@@ -51,16 +42,19 @@ def statot(x, source_idx, sink_idx, sink_weights, C = None, eps = None, method =
     if verbose:
         print("max inf-norm error for marginal agreement: ",
               max(np.linalg.norm(gamma.sum(1) - mu, ord = np.inf), np.linalg.norm(gamma.sum(0) - nu, ord = np.inf)))
-    gamma[np.ix_(sink_idx, sink_idx)] = np.eye(sink_idx.sum())
     return gamma, mu, nu
 
-def row_normalise(gamma):
-    """Row normalise coupling to produce transition matrix
+def row_normalise(gamma, sink_idx = None):
+    """Enforce sink condition and row normalise coupling to produce transition matrix
 
     :param gamma: coupling produced by `statot()`
     :return: transition matrix obtained by row-normalising the input `gamma`.
     """
-    return (gamma.T/gamma.sum(1)).T
+    gamma_ = gamma.copy()
+    if sink_idx is not None:
+        gamma_[sink_idx, :] = 0
+        gamma_[np.ix_(sink_idx, sink_idx)] = np.eye(sink_idx.sum())
+    return (gamma_.T/gamma_.sum(1)).T
 
 # transliterated from Julia code
 def _compute_NS(P, sink_idx):

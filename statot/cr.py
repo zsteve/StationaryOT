@@ -62,14 +62,13 @@ class OTKernel(Kernel):
             self.g = g
         self.flow_rate = flow_rate
     
-    def compute_transition_matrix(self, eps, dt, expr_key = "X_pca", cost_norm_method = None, sink_weights = None, method = "ent", thresh = 0, maxiter = 5000, C = None, verbose = False):
+    def compute_transition_matrix(self, eps, dt, expr_key = "X_pca", cost_norm_method = None, method = "ent", thresh = 0, maxiter = 5000, C = None, verbose = False):
         """Compute transition matrix using statOT 
 
         :param eps: regularisation parameter 
         :param dt: choice of the time step over which to fit the model
         :param expr_key: key to embedding to use in `adata.obsm`.
         :param cost_norm_method: cost normalisation method to use. use "mean" to ensure `mean(C) = 1`, or refer to `ot.utils.cost_normalization` in Python OT.
-        :param sink_weights: numeric array of length `N`. Only the entries corresponding to sinks will be used.
         :param eps: regularisation parameter 
         :param thresh: threshold for output transition probabilities (no thresholding by default)
         :param maxiter: max number of iterations for OT solver
@@ -77,7 +76,7 @@ class OTKernel(Kernel):
         :param verbose: detailed output on convergence of OT solver. 
         """
         start = logg.info("Computing transition matrix using statOT")
-        params = {"eps" : eps, "cost_norm_method" : cost_norm_method, "expr_key" : expr_key, "dt" : dt, "sink_weights" : sink_weights, "method" : method, "thresh" : thresh}
+        params = {"eps" : eps, "cost_norm_method" : cost_norm_method, "expr_key" : expr_key, "dt" : dt, "method" : method, "thresh" : thresh}
         if params == self.params:
             assert self.transition_matrix is not None, _ERROR_EMPTY_CACHE_MSG
             logg.debug(_LOG_USING_CACHE)
@@ -90,21 +89,15 @@ class OTKernel(Kernel):
                 C = C/C.mean()
             elif cost_norm_method is not None:
                 C = ot.utils.cost_normalization(C, norm = cost_norm_method)
-        if sink_weights is None:
-            sink_weights = np.ones(self.adata.shape[0])
-        gamma, mu, nu = statot(self.adata.obsm[expr_key], self.source_idx, self.sink_idx,
-                                      sink_weights, 
+        gamma, mu, nu = statot(self.adata.obsm[expr_key], 
                                       C = C, 
                                       eps = eps, 
                                       method = method, 
                                       g = self.g, 
-                                      flow_rate = self.flow_rate, 
                                       dt = dt,
                                       maxiter = maxiter, 
                                       verbose = verbose)
-        # logg.error("statot() failed to converge, perhaps eps is too small?")
-
-        transition_matrix = row_normalise(gamma) 
+        transition_matrix = row_normalise(gamma, sink_idx = self.sink_idx) 
         if thresh is not None:
             transition_matrix[transition_matrix < thresh] = 0
             transition_matrix = (transition_matrix.T/transition_matrix.sum(1)).T
