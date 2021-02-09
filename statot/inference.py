@@ -14,9 +14,6 @@ def statot(x, C = None, eps = None, method = "ent", g = None,
     """Fit statOT model
     
     :param x: input data -- `N` points of `M` dimensions in the form of a matrix with dimensions `(N, M)`
-    :param source_idx: boolean array of length `N`, set to `True` for sources and `False` otherwise.
-    :param sink_idx: boolean array of length `N`, set to `True` for sinks and `False` otherwise.
-    :param sink_weights: numeric array of length `N`. Only the entries corresponding to sinks will be used.
     :param C: cost matrix for optimal transport problem
     :param eps: regularisation parameter 
     :param method: choice of regularisation -- either "ent" (entropy) or "quad" (L2). "unbal" for unbalanced transport is not yet implemented. 
@@ -48,6 +45,8 @@ def row_normalise(gamma, sink_idx = None):
     """Enforce sink condition and row normalise coupling to produce transition matrix
 
     :param gamma: coupling produced by `statot()`
+    :param sink_idx: boolean array of length `N`, set to `True` for sinks and `False` otherwise. 
+        If provided, sets the transition distributions for all sinks to be the identity. 
     :return: transition matrix obtained by row-normalising the input `gamma`.
     """
     gamma_ = gamma.copy()

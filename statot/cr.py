@@ -39,9 +39,8 @@ class OTKernel(Kernel):
     :param sink_idx: string specifying the key in `adata.uns` to a boolean array of length `N`, set to `True` for sinks and `False` otherwise, or the array itself.
     :param g: string specifying the key in `adata.obs` to a numeric array of length `N`, containing the relative growth rates for cells, or the array itself.
     :param compute_cond_num: set to `True` to compute the condition number of the transition matrix. 
-    :param flow_rate: used only in the growth-free case (flow only)
     """
-    def __init__(self, adata, source_idx, sink_idx, g, compute_cond_num = False, flow_rate = None):
+    def __init__(self, adata, source_idx, sink_idx, g, compute_cond_num = False):
         super().__init__(adata, backward = False, compute_cond_num = compute_cond_num, check_connectivity = False)
         if isinstance(source_idx, str):
             self.source_idx = adata.uns[source_idx]
@@ -60,7 +59,6 @@ class OTKernel(Kernel):
             self.g = g
         else:
             self.g = g
-        self.flow_rate = flow_rate
     
     def compute_transition_matrix(self, eps, dt, expr_key = "X_pca", cost_norm_method = None, method = "ent", thresh = 0, maxiter = 5000, C = None, verbose = False):
         """Compute transition matrix using statOT 
