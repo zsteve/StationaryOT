@@ -53,6 +53,12 @@ compute_fate_probs_lineages(P, sink_idx, labels)
 ```
 where `labels` should be a `np.array` of strings corresponding to the lineage annotation for each cell.
 
+### Example application to Arabidopsis root tip
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/zsteve/statOT/blob/main/examples/arabidopsis-analysis.ipynb)
+
+An example application to Arabidopsis root tip data is available as a Jupyter notebook in the `examples/` directory. 
+
 ### Citing
 We are actively working on a manuscript which will be posted as a preprint soon.
 
