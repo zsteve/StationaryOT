@@ -34,10 +34,11 @@ Read the full documentation [here](https://statot.readthedocs.io/en/latest/).
 
 ### Quick Start
 
-First use the `statot.statot` function to calculate transition probabilities for cells in a single timestep:
+Compute first the vector `g` of growth rates. 
+Then use the `statot.statot` function to calculate transition probabilities for cells in a single timestep:
 
 ```python
-statot(x, source_idx, sink_idx, sink_weights, C = None, eps = None, method = "ent", g = None,
+statot(x, C = None, eps = None, method = "ent", g = None,
            flow_rate = None,
            dt = None, 
            maxiter = 5000, tol = 1e-9)
