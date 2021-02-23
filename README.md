@@ -1,5 +1,7 @@
 # StationaryOT: Dynamic inference from single-cell snapshots by optimal transport
 
+[![Documentation Status](https://readthedocs.org/projects/statot/badge/?version=latest)](https://statot.readthedocs.io/en/latest/?badge=latest)
+
 ![Schematic](https://github.com/zsteve/statOT/blob/main/aux_files/statot_illustration.png)
 
 ## Introduction and overview
