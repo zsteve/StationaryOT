@@ -67,7 +67,6 @@ class OTKernel(Kernel):
         :param dt: choice of the time step over which to fit the model
         :param expr_key: key to embedding to use in `adata.obsm`.
         :param cost_norm_method: cost normalisation method to use. use "mean" to ensure `mean(C) = 1`, or refer to `ot.utils.cost_normalization` in Python OT.
-        :param eps: regularisation parameter 
         :param thresh: threshold for output transition probabilities (no thresholding by default)
         :param maxiter: max number of iterations for OT solver
         :param C: cost matrix for optimal transport problem
