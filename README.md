@@ -17,7 +17,7 @@ This package provides the ability to run stationary OT on single-cell expression
 
 ## Installation
 
-Clone this repository and run `pip install .` in the top level directory. 
+Run `pip install statot` in your working environment. Alternatively, clone this repository and run `pip install .` in the top level directory. 
 
 ## Usage
 
