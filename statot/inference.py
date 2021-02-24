@@ -6,6 +6,48 @@ import pandas as pd
 from numpy import linalg 
 import ot
 import copy
+import pykeops
+from pykeops.numpy import LazyTensor, Vi, Vj
+
+dtype = "float32"
+
+def form_cost(mu_spt, nu_spt, norm_factor = None, keops = True):
+    norm = None
+    if keops:
+        C = ((Vi(mu_spt) - Vj(nu_spt))**2).sum(2)
+        if norm_factor == "mean":
+            norm = float(np.sum(C @ np.ones(C.shape[1], dtype = dtype))/(C.shape[0] * C.shape[1]))
+    else:
+        C = ot.utils.dist(mu_spt, nu_spt)
+        if norm_factor == "mean":
+            norm = C.mean()
+    if norm_factor is None:
+        norm = 1
+    elif norm is None:
+        norm = norm_factor
+    return C/norm, norm
+
+def sinkhorn_keops(mu, nu, C, eps, max_iter = 5000, err_check = 10, tol = 1e-9, verbose = False):
+    K = (-C/eps).exp()
+    u = np.ones(mu.shape[0], dtype = dtype)
+    v = np.ones(nu.shape[0], dtype = dtype)
+    converged = False
+    for i in range(max_iter):
+        u = mu/(K @ v)
+        v = nu/(K.T @ u)
+        if i % err_check == 0:
+            mu_tmp = u * (K @ v)
+            nu_tmp = v * (K.T @ u)
+            err = max(np.linalg.norm(mu - mu_tmp, ord = float('inf')), 
+                        np.linalg.norm(nu - nu_tmp, ord = float('inf')))
+            if verbose:
+                print("Iteration %d, Error = %f" % (i, err))
+            if err < tol:
+                converged = True
+                break
+    if converged == False:
+        print("Warning: sinkhorn failed to converge")
+    return u, K, v
 
 def statot(x, C = None, eps = None, method = "ent", g = None,
            dt = None, 
@@ -33,10 +75,13 @@ def statot(x, C = None, eps = None, method = "ent", g = None,
         gamma = ot.smooth.smooth_ot_dual(mu, nu, C, eps, numItermax = maxiter, stopThr = tol*mu.sum(), verbose = verbose)
     elif method == "ent":
         gamma = ot.sinkhorn(mu, nu, C, eps, numItermax = maxiter, stopThr = tol*mu.sum(), verbose = verbose)
+    elif method == "ent_keops":
+        u, K, v = sinkhorn_keops(np.array(mu, dtype = dtype), np.array(nu, dtype = dtype), C, eps, max_iter = maxiter, tol = tol*mu.sum(), verbose = verbose)
+        gamma = (Vi(u.reshape(-1, 1)) * K * Vj(v.reshape(-1, 1))) 
     elif method == "unbal":
         print("method = 'unbal' not implemented yet")
     # manually check for convergence since POT is a bit iffy
-    if verbose:
+    if verbose and method != "ent_keops":
         print("max inf-norm error for marginal agreement: ",
               max(np.linalg.norm(gamma.sum(1) - mu, ord = np.inf), np.linalg.norm(gamma.sum(0) - nu, ord = np.inf)))
     return gamma, mu, nu
@@ -44,7 +89,7 @@ def statot(x, C = None, eps = None, method = "ent", g = None,
 def row_normalise(gamma, sink_idx = None):
     """Enforce sink condition and row normalise coupling to produce transition matrix
 
-    :param gamma: coupling produced by `statot()`
+    :param gamma: coupling produced by `statot()`;
     :param sink_idx: boolean array of length `N`, set to `True` for sinks and `False` otherwise. 
         If provided, sets the transition distributions for all sinks to be the identity. 
     :return: transition matrix obtained by row-normalising the input `gamma`.
@@ -54,6 +99,14 @@ def row_normalise(gamma, sink_idx = None):
         gamma_[sink_idx, :] = 0
         gamma_[np.ix_(sink_idx, sink_idx)] = np.eye(sink_idx.sum())
     return (gamma_.T/gamma_.sum(1)).T
+
+def gaussian_tr(C, h):
+    """Form Gaussian (discrete heat flow) transition matrix of bandwidth h
+    
+    :param C: pairwise square distances
+    :param h: bandwidth
+    """
+    return row_normalise(np.exp(-C/h))
 
 # transliterated from Julia code
 def _compute_NS(P, sink_idx):

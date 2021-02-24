@@ -60,7 +60,7 @@ class OTKernel(Kernel):
         else:
             self.g = g
     
-    def compute_transition_matrix(self, eps, dt, expr_key = "X_pca", cost_norm_method = None, method = "ent", thresh = 0, maxiter = 5000, C = None, verbose = False):
+    def compute_transition_matrix(self, eps, dt, expr_key = "X_pca", cost_norm_method = None, method = "ent", tol = 0, thresh = 0, maxiter = 5000, C = None, verbose = False):
         """Compute transition matrix using statOT 
 
         :param eps: regularisation parameter 
@@ -93,6 +93,7 @@ class OTKernel(Kernel):
                                       g = self.g, 
                                       dt = dt,
                                       maxiter = maxiter, 
+                                      tol = tol, 
                                       verbose = verbose)
         transition_matrix = row_normalise(gamma, sink_idx = self.sink_idx) 
         if thresh is not None:
