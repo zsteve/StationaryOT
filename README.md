@@ -1,5 +1,8 @@
 # StationaryOT: Dynamic inference from single-cell snapshots by optimal transport
 
+
+[![PyPI version](https://badge.fury.io/py/statot.svg)](https://badge.fury.io/py/statot) [![Documentation Status](https://readthedocs.org/projects/statot/badge/?version=latest)](https://statot.readthedocs.io/en/latest/?badge=latest)
+
 ![Schematic](https://github.com/zsteve/statOT/blob/main/aux_files/statot_illustration.png)
 
 ## Introduction and overview
@@ -17,7 +20,7 @@ This package provides the ability to run stationary OT on single-cell expression
 
 ## Installation
 
-Clone this repository and run `pip install .` in the top level directory. 
+Run `pip install statot` in your working environment. Alternatively, clone this repository and run `pip install .` in the top level directory. 
 
 ## Usage
 
@@ -34,10 +37,11 @@ Read the full documentation [here](https://statot.readthedocs.io/en/latest/).
 
 ### Quick Start
 
-First use the `statot.statot` function to calculate transition probabilities for cells in a single timestep:
+Compute first the vector `g` of growth rates. 
+Then use the `statot.statot` function to calculate transition probabilities for cells in a single timestep:
 
 ```python
-statot(x, source_idx, sink_idx, sink_weights, C = None, eps = None, method = "ent", g = None,
+statot(x, C = None, eps = None, method = "ent", g = None,
            flow_rate = None,
            dt = None, 
            maxiter = 5000, tol = 1e-9)
