@@ -20,6 +20,14 @@ statot.inference module
    :undoc-members:
    :show-inheritance:
 
+statot.keops module
+-------------------
+
+.. automodule:: statot.keops
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 
