@@ -37,7 +37,7 @@ def form_cost(mu_spt, nu_spt, norm_factor = None, keops = True):
         norm = norm_factor
     return C/norm, norm
 
-def sinkhorn_keops(mu, nu, K, max_iter = 5000, err_check = 10, tol = 1e-9, verbose = False):
+def sinkhorn(mu, nu, K, max_iter = 5000, err_check = 10, tol = 1e-9, verbose = False):
     """Sinkhorn algorithm compatible with KeOps LazyTensor
     
     :param mu: source distribution
