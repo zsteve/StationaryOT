@@ -17,6 +17,7 @@ def statot(x, C = None, eps = None, method = "ent", g = None,
     :param C: cost matrix for optimal transport problem
     :param eps: regularisation parameter 
     :param method: choice of regularisation -- either "ent" (entropy) or "quad" (L2). "unbal" for unbalanced transport is not yet implemented. 
+                if "marginals", return just `mu` and `nu`.
     :param g: numeric array of length `N`, containing the relative growth rates for cells.
     :param flow_rate: used only in the growth-free case (flow only)
     :param dt: choice of the time step over which to fit the model
@@ -29,6 +30,8 @@ def statot(x, C = None, eps = None, method = "ent", g = None,
     nu_spt = x
     mu = g**dt
     nu = mu.sum()/x.shape[0]*np.ones(x.shape[0])
+    if method == "marginals":
+        return mu, nu
     if method == "quad":
         gamma = ot.smooth.smooth_ot_dual(mu, nu, C, eps, numItermax = maxiter, stopThr = tol*mu.sum(), verbose = verbose)
     elif method == "ent":

@@ -1,6 +1,10 @@
-
+import ot
+import numpy as np
 import pykeops
 from pykeops.numpy import LazyTensor, Vi, Vj
+import scipy
+from scipy.sparse.linalg.interface import IdentityOperator
+from scipy.sparse.linalg import aslinearoperator, LinearOperator, gmres
 
 dtype = "float32"
 
@@ -63,3 +67,22 @@ def sinkhorn_keops(mu, nu, K, max_iter = 5000, err_check = 10, tol = 1e-9, verbo
     if converged == False:
         print("Warning: sinkhorn failed to converge")
     return u, v
+
+def get_QR_submat(u, K, v, X, sink_idx, eps, cost_norm_factor):
+    gamma = (Vi(u.reshape(-1, 1)) * K * Vj(v.reshape(-1, 1))) 
+    z = gamma @ np.ones(gamma.shape[1], dtype = dtype)  # row norm factor for full tr matrix
+    # KeOps doesn't allow slicing of LazyTensors, so need to manually construct Q as submatrix of P
+    K_q = (-form_cost(X[~sink_idx, :], X[~sink_idx, :], norm_factor = cost_norm_factor)[0]/eps).exp() 
+    K_r = np.exp(-form_cost(X[~sink_idx, :], X[sink_idx, :], norm_factor = cost_norm_factor, keops = False)[0]/eps)
+    Q = Vi((u/z)[~sink_idx].reshape(-1, 1)) * K_q * Vj(v[~sink_idx].reshape(-1, 1)) 
+    R = (u/z)[~sink_idx].reshape(-1, 1) * K_r * v[sink_idx].reshape(1, -1)
+    return Q, R
+
+def compute_fate_probs(Q, R):
+    A = IdentityOperator(Q.shape) - aslinearoperator(Q)
+    A.dtype = np.dtype(dtype)
+    B = np.zeros(R.shape, dtype = dtype)
+    for i in range(R.shape[1]):
+        print("Solving fate probabilities for lineage %d" % i)
+        B[:, i] = gmres(A, R[:, i])
+    return B
