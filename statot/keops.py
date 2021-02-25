@@ -84,5 +84,8 @@ def compute_fate_probs(Q, R):
     B = np.zeros(R.shape, dtype = dtype)
     for i in range(R.shape[1]):
         print("Solving fate probabilities for lineage %d" % i)
-        B[:, i] = gmres(A, R[:, i])
+        out = gmres(A, R[:, i])
+        if out[1] != 0:
+            print("Warning: gmres returned error code %d" % out[1])
+        B[:, i] = out[0]
     return B
