@@ -69,6 +69,16 @@ def sinkhorn(mu, nu, K, max_iter = 5000, err_check = 10, tol = 1e-9, verbose = F
     return u, v
 
 def get_QR_submat(u, K, v, X, sink_idx, eps, cost_norm_factor):
+    """Compute Q (as LazyTensor) and R (as np.ndarray) matrices 
+    
+    :param u: dual potential for source distribution
+    :param K: Gibbs kernel as `LazyTensor`
+    :param v: dual potential for target distribution
+    :param X: coordinates as np.ndarraya
+    :param sink_idx: boolean array of length `N`, set to `True` for sinks and `False` otherwise. 
+    :param eps: value of `eps` used for solving with `sinkhorn`
+    :param cost_norm_factor: normalisation factor used in `form_cost`
+    """
     gamma = (Vi(u.reshape(-1, 1)) * K * Vj(v.reshape(-1, 1))) 
     z = gamma @ np.ones(gamma.shape[1], dtype = dtype)  # row norm factor for full tr matrix
     # KeOps doesn't allow slicing of LazyTensors, so need to manually construct Q as submatrix of P
@@ -79,6 +89,12 @@ def get_QR_submat(u, K, v, X, sink_idx, eps, cost_norm_factor):
     return Q, R
 
 def compute_fate_probs(Q, R):
+    """Compute fate probabilities from Q (LazyTensor) and R (np.ndarray)
+    
+    :param Q: transient part of transition matrix from `get_QR_submat`, as `LazyTensor`
+    :param R: absorbing part of transition matrix. Should aggregate the columns across fates, 
+                since the solver cannot solve multiple RHS at once. 
+    """
     A = IdentityOperator(Q.shape) - aslinearoperator(Q)
     A.dtype = np.dtype(dtype)
     B = np.zeros(R.shape, dtype = dtype)
