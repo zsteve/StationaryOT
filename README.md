@@ -61,7 +61,7 @@ where `labels` should be a `np.array` of strings corresponding to the lineage an
 
 ### Example application to Arabidopsis root tip
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/zsteve/statOT/blob/main/examples/arabidopsis-analysis.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/zsteve/statOT/blob/main/examples/arabidopsis_analysis.ipynb)
 
 An example application to Arabidopsis root tip data is available as a Jupyter notebook in the `examples/` directory. 
 
