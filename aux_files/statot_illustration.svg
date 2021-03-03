@@ -8,16 +8,18 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="181.36894mm"
-   height="164.0591mm"
-   viewBox="0 0 181.36894 164.0591"
+   width="7.1405096in"
+   height="6.4590197in"
+   viewBox="0 0 181.36895 164.0591"
    version="1.1"
    id="svg8"
    inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07, custom)"
    sodipodi:docname="statot_illustration.svg"
-   inkscape:export-filename="/home/zsteve/statot_illustration.png"
+   inkscape:export-filename="/home/zsteve/statOT/aux_files/statot_illustration.png"
    inkscape:export-xdpi="94.599998"
    inkscape:export-ydpi="94.599998">
+  <style
+     id="style23251"></style>
   <defs
      id="defs2">
     <marker
@@ -19242,11 +19244,11 @@
      pagecolor="#ffffff"
      bordercolor="#666666"
      borderopacity="1.0"
-     inkscape:pageopacity="0.0"
+     inkscape:pageopacity="1"
      inkscape:pageshadow="2"
      inkscape:zoom="0.7"
-     inkscape:cx="262.17636"
-     inkscape:cy="311.53952"
+     inkscape:cx="152.53813"
+     inkscape:cy="180.51208"
      inkscape:document-units="mm"
      inkscape:current-layer="surface1003336"
      inkscape:document-rotation="0"
@@ -19259,7 +19261,11 @@
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
-     fit-margin-bottom="0" />
+     fit-margin-bottom="0"
+     inkscape:pagecheckerboard="true"
+     units="in"
+     width="16in"
+     inkscape:showpageshadow="false" />
   <metadata
      id="metadata5">
     <rdf:RDF>
