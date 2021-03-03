@@ -70,7 +70,9 @@ An example application to Arabidopsis root tip data is available as a Jupyter no
 Read the [preprint](https://www.biorxiv.org/content/10.1101/2021.03.02.433630v1). 
 
 Optimal transport analysis reveals trajectories in steady-state systems
+
 Stephen Zhang, Anton Afanassiev, Laura Greenstreet, Tetsuya Matsumoto, Geoffrey Schiebinger
+
 bioRxiv 2021.03.02.433630; doi: https://doi.org/10.1101/2021.03.02.433630
 
 ### References
