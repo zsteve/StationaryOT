@@ -66,7 +66,12 @@ where `labels` should be a `np.array` of strings corresponding to the lineage an
 An example application to Arabidopsis root tip data is available as a Jupyter notebook in the `examples/` directory. 
 
 ### Citing
-We are actively working on a manuscript which will be posted as a preprint soon.
+
+Read the [preprint](https://www.biorxiv.org/content/10.1101/2021.03.02.433630v1). 
+
+Optimal transport analysis reveals trajectories in steady-state systems
+Stephen Zhang, Anton Afanassiev, Laura Greenstreet, Tetsuya Matsumoto, Geoffrey Schiebinger
+bioRxiv 2021.03.02.433630; doi: https://doi.org/10.1101/2021.03.02.433630
 
 ### References
 [1] Schiebinger, G et al. Optimal-transport analysis of single-cell gene expression identifies developmentaltrajectories in reprogramming. Cell. 2019; 176(4): 928–943. https://doi.org/10.1016/j.cell.2019.02.026.
