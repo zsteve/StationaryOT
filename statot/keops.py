@@ -38,7 +38,8 @@ def form_cost(mu_spt, nu_spt, norm_factor = None, keops = True):
     return C/norm, norm
 
 def sinkhorn(mu, nu, K, max_iter = 5000, err_check = 10, tol = 1e-9, verbose = False):
-    """Sinkhorn algorithm compatible with KeOps LazyTensor
+    """Sinkhorn algorithm for solving entropy-regularised optimal transport
+        compatible with KeOps LazyTensor framework. 
     
     :param mu: source distribution
     :param nu: target distribution
@@ -69,7 +70,24 @@ def sinkhorn(mu, nu, K, max_iter = 5000, err_check = 10, tol = 1e-9, verbose = F
     return u, v
 
 
-def quad_ot_semismooth_newton(mu, nu, C, eps, max_iter = 50, theta = 0.1, kappa = 0.5, tol = 1e-3, eta = 1e-3, cg_max_iter = 100, verbose = False):
+def quad_ot_semismooth_newton(mu, nu, C, eps, max_iter = 50, theta = 0.1, kappa = 0.5, tol = 1e-3, eta = 1e-5, cg_max_iter = 500, verbose = False):
+    """Semismooth Newton algorithm for solving quadratically regularised optimal transport
+        compatible with KeOps LazyTensor framework. Uses the method from Algorithm 2 of 
+        `Lorenz, D.A., Manns, P. and Meyer, C., 2019. 
+        Quadratically regularized optimal transport. Applied Mathematics & Optimization, pp.1-31.`
+
+    :param mu: source distribution
+    :param nu: target distribution
+    :param C: cost matrix as `LazyTensor`
+    :param max_iter: maximum number of Newton steps
+    :param theta: Armijo control parameter (choose in :math:`(0, 1)`)
+    :param kappa: Armijo step scaling parameter (choose in :math:`(0, 1)`)
+    :param tol: tolerance (inf-norm on marginals)
+    :param eta: conjugate gradient regularisation parameter 
+    :param cg_max_iter: maximum number of conjugate gradient iterations
+    :param verbose: flag for verbose output
+
+    """
     class NewtonMatrix:
         def __init__(self, sigma, eta):
             self.sigma = sigma
@@ -86,12 +104,14 @@ def quad_ot_semismooth_newton(mu, nu, C, eps, max_iter = 50, theta = 0.1, kappa 
     def Phi(u, v, mu, nu, C, eps):
         X = ((Vi(u.reshape(-1, 1)) + Vj(v.reshape(-1, 1)) - C).relu())**2
         return (X @ np.ones(X.shape[1], dtype = dtype)).sum()/2 - eps*(np.dot(u, nu) + np.dot(v, mu))
+    # initialise dual variables
     u = np.ones(mu.shape[0], dtype = dtype)
     v = np.ones(nu.shape[0], dtype = dtype)
     for i in range(max_iter):
         P = Vi(u.reshape(-1, 1)) + Vj(v.reshape(-1, 1)) - C
         sigma = P.relu().sign()
         gamma = P.relu()/eps
+        # compute Newton matrix
         G = NewtonMatrix(sigma, eta = eta)
         G_op = aslinearoperator(G)
         x = np.concatenate([gamma @ np.ones(gamma.shape[1], dtype = dtype) - nu,
@@ -102,6 +122,7 @@ def quad_ot_semismooth_newton(mu, nu, C, eps, max_iter = 50, theta = 0.1, kappa 
         du = duv[0:u.shape[0]]
         dv = duv[u.shape[0]:]
         d = eps*((gamma.T @ du).sum() + (gamma @ dv).sum() - (np.dot(du, nu) + np.dot(dv, mu)))
+        # Armijo backtracking linesearch 
         t = 1
         Phi0 = Phi(u, v, mu, nu, C, eps)
         while Phi(u + t*du, v + t*dv, mu, nu, C, eps) >= Phi0 + t*theta*d:
@@ -109,7 +130,8 @@ def quad_ot_semismooth_newton(mu, nu, C, eps, max_iter = 50, theta = 0.1, kappa 
             if (t == 0) and verbose: 
                 print("Warning: underflow in step size t")
                 break
-        u = u + t*du
+        # make Newton step 
+        u = u + t*du 
         v = v + t*dv
         err1 = np.linalg.norm(gamma @ np.ones(gamma.shape[1], dtype = dtype) - nu, ord = float("inf"))
         err2 = np.linalg.norm(gamma.T @ np.ones(gamma.shape[0], dtype = dtype) - mu, ord = float("inf"))
@@ -120,7 +142,8 @@ def quad_ot_semismooth_newton(mu, nu, C, eps, max_iter = 50, theta = 0.1, kappa 
     return u, v
 
 def get_QR_submat_ent(u, K, v, X, sink_idx, eps, cost_norm_factor):
-    """Compute Q (as LazyTensor) and R (as np.ndarray) matrices 
+    """Compute Q (as LazyTensor) and R (as np.ndarray) matrices for 
+        entropy-regularised OT dual potentials (u, v)
     
     :param u: dual potential for source distribution
     :param K: Gibbs kernel as `LazyTensor`
@@ -140,6 +163,17 @@ def get_QR_submat_ent(u, K, v, X, sink_idx, eps, cost_norm_factor):
     return Q, R
 
 def get_QR_submat_quad(u, C, v, X, sink_idx, eps, cost_norm_factor):
+    """Compute Q (as LazyTensor) and R (as np.ndarray) matrices for
+        quadratically regularised OT dual potentials (u, v)
+    
+    :param u: dual potential for source distribution
+    :param C: cost matrix as `LazyTensor`
+    :param v: dual potential for target distribution
+    :param X: coordinates as np.ndarray
+    :param sink_idx: boolean array of length `N`, set to `True` for sinks and `False` otherwise. 
+    :param eps: value of `eps` used for solving with `quad_ot_semismooth_newton`
+    :param cost_norm_factor: normalisation factor used in `form_cost`
+    """
     gamma = (Vj(u.reshape(-1, 1)) + Vi(v.reshape(-1, 1)) - C.T).relu()/eps
     z = gamma @ np.ones(gamma.shape[1], dtype = dtype)  # row norm factor for full tr matrix
     # KeOps doesn't allow slicing of LazyTensors, so need to manually construct Q as submatrix of P
