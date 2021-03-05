@@ -4,7 +4,7 @@ import pykeops
 from pykeops.numpy import LazyTensor, Vi, Vj
 import scipy
 from scipy.sparse.linalg.interface import IdentityOperator
-from scipy.sparse.linalg import aslinearoperator, LinearOperator, gmres
+from scipy.sparse.linalg import aslinearoperator, LinearOperator, gmres, cg
 
 dtype = "float32"
 
