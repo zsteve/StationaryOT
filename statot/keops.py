@@ -71,18 +71,18 @@ def sinkhorn(mu, nu, K, max_iter = 5000, err_check = 10, tol = 1e-9, verbose = F
 
 def quad_ot_semismooth_newton(mu, nu, C, eps, max_iter = 50, theta = 0.1, kappa = 0.5, tol = 1e-3, eta = 1e-3, cg_max_iter = 100, verbose = False):
     class NewtonMatrix:
-    def __init__(self, sigma, eta):
-        self.sigma = sigma
-        self.eta = eta
-        self.diag = np.concatenate([sigma @ np.ones(sigma.shape[1], dtype = dtype), 
-            sigma.T @ np.ones(sigma.shape[0], dtype = dtype)]) + eta
-        self.offdiag = [sigma, sigma.T]
-        self.shape = (sum(self.sigma.shape), sum(self.sigma.shape))
-        self.dtype = self.sigma.dtype
-    def matvec(self, v):
-        v1 = v[0:self.sigma.shape[0]]
-        v2 = v[self.sigma.shape[0]:]
-        return self.diag * v + np.concatenate([self.sigma @ v2 , self.sigma.T @ v1])
+        def __init__(self, sigma, eta):
+            self.sigma = sigma
+            self.eta = eta
+            self.diag = np.concatenate([sigma @ np.ones(sigma.shape[1], dtype = dtype), 
+                sigma.T @ np.ones(sigma.shape[0], dtype = dtype)]) + eta
+            self.offdiag = [sigma, sigma.T]
+            self.shape = (sum(self.sigma.shape), sum(self.sigma.shape))
+            self.dtype = self.sigma.dtype
+        def matvec(self, v):
+            v1 = v[0:self.sigma.shape[0]]
+            v2 = v[self.sigma.shape[0]:]
+            return self.diag * v + np.concatenate([self.sigma @ v2 , self.sigma.T @ v1])
     def Phi(u, v, mu, nu, C, eps):
         X = ((Vi(u.reshape(-1, 1)) + Vj(v.reshape(-1, 1)) - C).relu())**2
         return (X @ np.ones(X.shape[1], dtype = dtype)).sum()/2 - eps*(np.dot(u, nu) + np.dot(v, mu))
