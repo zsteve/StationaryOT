@@ -68,13 +68,64 @@ def sinkhorn(mu, nu, K, max_iter = 5000, err_check = 10, tol = 1e-9, verbose = F
         print("Warning: sinkhorn failed to converge")
     return u, v
 
-def get_QR_submat(u, K, v, X, sink_idx, eps, cost_norm_factor):
+
+def quad_ot_semismooth_newton(mu, nu, C, eps, max_iter = 50, theta = 0.1, kappa = 0.5, tol = 1e-3, eta = 1e-3, cg_max_iter = 100, verbose = False):
+    class NewtonMatrix:
+	def __init__(self, sigma, eta):
+	    self.sigma = sigma
+	    self.eta = eta
+	    self.diag = np.concatenate([sigma @ np.ones(sigma.shape[1], dtype = dtype), 
+				      sigma.T @ np.ones(sigma.shape[0], dtype = dtype)]) + eta
+	    self.offdiag = [sigma, sigma.T]
+	    self.shape = (sum(self.sigma.shape), sum(self.sigma.shape))
+	    self.dtype = self.sigma.dtype
+	def matvec(self, v):
+	    v1 = v[0:self.sigma.shape[0]]
+	    v2 = v[self.sigma.shape[0]:]
+	    return self.diag * v + np.concatenate([self.sigma @ v2 , self.sigma.T @ v1])
+    def Phi(u, v, mu, nu, C, eps):
+	X = ((Vi(u.reshape(-1, 1)) + Vj(v.reshape(-1, 1)) - C).relu())**2
+	return (X @ np.ones(X.shape[1], dtype = dtype)).sum()/2 - eps*(np.dot(u, nu) + np.dot(v, mu))
+    u = np.ones(mu.shape[0], dtype = dtype)
+    v = np.ones(nu.shape[0], dtype = dtype)
+    for i in range(max_iter):
+	P = Vi(u.reshape(-1, 1)) + Vj(v.reshape(-1, 1)) - C
+	sigma = P.relu().sign()
+	gamma = P.relu()/eps
+	G = NewtonMatrix(sigma, eta = eta)
+	G_op = aslinearoperator(G)
+	x = np.concatenate([gamma @ np.ones(gamma.shape[1], dtype = dtype) - nu,
+			gamma.T @ np.ones(gamma.shape[0], dtype = dtype) - mu])
+	duv, cg_err = cg(G_op, -eps*x, maxiter = cg_max_iter)
+	if (cg_err != 0 ) and verbose:
+	    print("Warning: cg failed to converge")
+	du = duv[0:u.shape[0]]
+	dv = duv[u.shape[0]:]
+	d = eps*((gamma.T @ du).sum() + (gamma @ dv).sum() - (np.dot(du, nu) + np.dot(dv, mu)))
+	t = 1
+	Phi0 = Phi(u, v, mu, nu, C, eps)
+	while Phi(u + t*du, v + t*dv, mu, nu, C, eps) >= Phi0 + t*theta*d:
+	    t *= kappa
+	    if (t == 0) and verbose: 
+		print("Warning: underflow in step size t")
+		break
+	u = u + t*du
+	v = v + t*dv
+	err1 = np.linalg.norm(gamma @ np.ones(gamma.shape[1], dtype = dtype) - nu, ord = float("inf"))
+	err2 = np.linalg.norm(gamma.T @ np.ones(gamma.shape[0], dtype = dtype) - mu, ord = float("inf"))
+	if verbose:
+	    print("Iteration ", i, "Error = ", max(err1, err2))
+	if max(err1, err2) < tol:
+	    break
+    return u, v
+
+def get_QR_submat_ent(u, K, v, X, sink_idx, eps, cost_norm_factor):
     """Compute Q (as LazyTensor) and R (as np.ndarray) matrices 
     
     :param u: dual potential for source distribution
     :param K: Gibbs kernel as `LazyTensor`
     :param v: dual potential for target distribution
-    :param X: coordinates as np.ndarraya
+    :param X: coordinates as np.ndarray
     :param sink_idx: boolean array of length `N`, set to `True` for sinks and `False` otherwise. 
     :param eps: value of `eps` used for solving with `sinkhorn`
     :param cost_norm_factor: normalisation factor used in `form_cost`
@@ -87,6 +138,16 @@ def get_QR_submat(u, K, v, X, sink_idx, eps, cost_norm_factor):
     Q = Vi((u/z)[~sink_idx].reshape(-1, 1)) * K_q * Vj(v[~sink_idx].reshape(-1, 1)) 
     R = (u/z)[~sink_idx].reshape(-1, 1) * K_r * v[sink_idx].reshape(1, -1)
     return Q, R
+
+def get_QR_submat_quad(u, C, v, X, sink_idx, eps, cost_norm_factor):
+    gamma = (Vj(u.reshape(-1, 1)) + Vi(v.reshape(-1, 1)) - C.T).relu()/eps
+    z = gamma @ np.ones(gamma.shape[1], dtype = dtype)  # row norm factor for full tr matrix
+    # KeOps doesn't allow slicing of LazyTensors, so need to manually construct Q as submatrix of P
+    C_q = statot.keops.form_cost(X[~sink_idx, :], X[~sink_idx, :], norm_factor = cost_norm_factor)[0] 
+    C_r = statot.keops.form_cost(X[sink_idx, :], X[~sink_idx, :], norm_factor = cost_norm_factor, keops = False)[0]
+    Q = (Vj(u[~sink_idx].reshape(-1, 1)) + Vi(v[~sink_idx].reshape(-1, 1)) - C_q.T).relu()/eps
+    R = np.maximum(u[sink_idx].reshape(1, -1) + v[~sink_idx].reshape(-1, 1) - C_r.T, 0)/eps
+    return Q / Vi(z[~sink_idx].reshape(-1, 1)), R / z[~sink_idx].reshape(-1, 1)
 
 def compute_fate_probs(Q, R):
     """Compute fate probabilities from Q (LazyTensor) and R (np.ndarray)
