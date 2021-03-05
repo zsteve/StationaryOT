@@ -143,8 +143,8 @@ def get_QR_submat_quad(u, C, v, X, sink_idx, eps, cost_norm_factor):
     gamma = (Vj(u.reshape(-1, 1)) + Vi(v.reshape(-1, 1)) - C.T).relu()/eps
     z = gamma @ np.ones(gamma.shape[1], dtype = dtype)  # row norm factor for full tr matrix
     # KeOps doesn't allow slicing of LazyTensors, so need to manually construct Q as submatrix of P
-    C_q = statot.keops.form_cost(X[~sink_idx, :], X[~sink_idx, :], norm_factor = cost_norm_factor)[0] 
-    C_r = statot.keops.form_cost(X[sink_idx, :], X[~sink_idx, :], norm_factor = cost_norm_factor, keops = False)[0]
+    C_q = form_cost(X[~sink_idx, :], X[~sink_idx, :], norm_factor = cost_norm_factor)[0] 
+    C_r = form_cost(X[sink_idx, :], X[~sink_idx, :], norm_factor = cost_norm_factor, keops = False)[0]
     Q = (Vj(u[~sink_idx].reshape(-1, 1)) + Vi(v[~sink_idx].reshape(-1, 1)) - C_q.T).relu()/eps
     R = np.maximum(u[sink_idx].reshape(1, -1) + v[~sink_idx].reshape(-1, 1) - C_r.T, 0)/eps
     return Q / Vi(z[~sink_idx].reshape(-1, 1)), R / z[~sink_idx].reshape(-1, 1)
