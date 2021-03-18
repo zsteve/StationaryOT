@@ -17,7 +17,7 @@ from cellrank.tl.kernels._base_kernel import (
 )
 
 def set_terminal_states(adata, sink_idx, labels, terminal_colors):
-    """Set terminal states for CellRank API
+    """Set user-specified terminal states for CellRank API functions and OTKernel.
     
     :param adata: `AnnData` object containing `N` cells. 
     :param sink_idx: string specifying the key in `adata.uns` to a boolean array of length `N`, set to `True` for sinks and `False` otherwise, or the array itself.
@@ -32,26 +32,18 @@ def set_terminal_states(adata, sink_idx, labels, terminal_colors):
     return 
 
 class OTKernel(Kernel):
-    """Kernel class allowing statOT method to be used from CellRank
+    """Kernel class allowing statOT method to be used from CellRank. 
+    Call first `set_terminal_states` to specify which cells to use as sinks.
     
     :param adata: `AnnData` object containing `N` cells. We can use any embedding for statOT, selected when calling `OTKernel.compute_transition_matrix()`. 
-    :param source_idx: string specifying the key in `adata.uns` to a boolean array of length `N`, set to `True` for sources and `False` otherwise, or the array itself.
-    :param sink_idx: string specifying the key in `adata.uns` to a boolean array of length `N`, set to `True` for sinks and `False` otherwise, or the array itself.
     :param g: string specifying the key in `adata.obs` to a numeric array of length `N`, containing the relative growth rates for cells, or the array itself.
     :param compute_cond_num: set to `True` to compute the condition number of the transition matrix. 
     """
-    def __init__(self, adata, source_idx, sink_idx, g, compute_cond_num = False):
+    def __init__(self, adata, g, compute_cond_num = False):
         super().__init__(adata, backward = False, compute_cond_num = compute_cond_num, check_connectivity = False)
-        if isinstance(source_idx, str):
-            self.source_idx = adata.uns[source_idx]
-        else:
-            assert adata.shape[0] == source_idx.shape[0], "Size of source_idx doesn't match adata!"
-            self.source_idx = source_idx
-        if isinstance(sink_idx, str):
-            self.sink_idx = adata.uns[sink_idx]
-        else:
-            assert adata.shape[0] == sink_idx.shape[0], "Size of sink_idx doesn't match adata!"
-            self.sink_idx = sink_idx
+        assert hasattr(adata.obs, "terminal_states") == True, "`adata.obs.terminal_states` not set, call `set_terminal_states` first!"
+        self.sink_idx = np.array(adata.obs.terminal_states.cat.codes != -1, dtype = np.bool)
+        self.source_idx = None
         if isinstance(g, str):
             self.g = adata.obs[g]
         elif g is not None:
@@ -60,8 +52,8 @@ class OTKernel(Kernel):
         else:
             self.g = g
     
-    def compute_transition_matrix(self, eps, dt, expr_key = "X_pca", cost_norm_method = None, method = "ent", tol = 0, thresh = 0, maxiter = 5000, C = None, verbose = False):
-        """Compute transition matrix using statOT 
+    def compute_transition_matrix(self, eps, dt, expr_key = "X_pca", cost_norm_method = None, method = "ent", tol = 1e-9, thresh = 0, maxiter = 5000, C = None, verbose = False):
+        """Compute transition matrix using StationaryOT. 
 
         :param eps: regularisation parameter 
         :param dt: choice of the time step over which to fit the model
