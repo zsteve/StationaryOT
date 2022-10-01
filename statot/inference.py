@@ -77,28 +77,31 @@ def _compute_NS(P, sink_idx):
     N = np.eye(Q.shape[0]) - Q
     return N, S
 
-def compute_fate_probs(P, sink_idx):
+def compute_fate_probs(P, sink_idx, tik_reg=0):
     """Compute fate probabilities by individual sink cell
 
     :param P: transition matrix
     :param sink_idx: boolean array of length `N`, set to `True` for sinks and `False` otherwise.
+    :param tik_reg: Amount of Tikhonov regularization to add in case of a singular matrix error. 1e-10 should work.
     :return: matrix with dimensions `(N, S)` where `S` is the number of sink cells present.
     """
     N, S = _compute_NS(P, sink_idx)
+    N += tik_reg*np.eye(*N.shape)  # Tikhonov regularization
     B = np.zeros((P.shape[0], sink_idx.sum()))
     B[~sink_idx, :] = np.linalg.solve(N, S)
     B[sink_idx, :] = np.eye(sink_idx.sum())
     return B
 
-def compute_fate_probs_lineages(P, sink_idx, labels):
+def compute_fate_probs_lineages(P, sink_idx, labels, tik_reg=0):
     """Compute fate probabilities by lineage
 
     :param P: transition matrix
     :param sink_idx: boolean array of length `N`, set to `True` for sinks and `False` otherwise.
     :param labels: string array of length `N` containing lineage names. Only those entries corresponding to sinks will be used.
+    :param tik_reg: Amount of Tikhonov regularization to add in case of a singular matrix error. 1e-10 should work.
     :return: matrix with dimensions `(N, L)` where `L` is the number of lineages with sinks.
     """
-    B = compute_fate_probs(P, sink_idx)
+    B = compute_fate_probs(P, sink_idx, tik_reg)
     sink_labels = np.unique(labels[sink_idx])
     B_lineages = np.array([B[:, labels[sink_idx] == i].sum(1) for i in sink_labels]).T
     return B_lineages, sink_labels
