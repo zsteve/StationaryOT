@@ -20,13 +20,6 @@ Core implementation
     :undoc-members:
     :show-inheritance:
 
-CellRank wrapper
-----------------
-.. automodule:: statot.cr
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 pyKeOps-numpy implementation
 ----------------------------
 .. automodule:: statot.keops

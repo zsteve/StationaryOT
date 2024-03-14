@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="statot", # Replace with your own username
-    version="0.0.14",
+    version="0.0.15",
     author="Stephen Zhang",
     author_email="syz@math.ubc.ca",
     description="statOT",

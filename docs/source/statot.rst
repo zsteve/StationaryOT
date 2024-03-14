@@ -4,14 +4,6 @@ statot package
 Submodules
 ----------
 
-statot.cr module
-----------------
-
-.. automodule:: statot.cr
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 statot.inference module
 -----------------------
 
